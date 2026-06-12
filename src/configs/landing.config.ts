@@ -1,14 +1,17 @@
 import { Video, Palette, Download } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
+import {
+  GRADIENT,
+  GRADIENT_REVERSE,
+  VIOLET,
+  PURPLE,
+  FUCHSIA,
+  STATUS_COLORS,
+  STEP_COLORS,
+} from "@/design-system/tokens";
 
-/* ── Brand colours ── */
-export const GRADIENT =
-  "linear-gradient(135deg, rgb(139, 92, 246) 0%, rgb(217, 70, 239) 100%)";
-export const GRADIENT_REVERSE =
-  "linear-gradient(135deg, rgb(217, 70, 239) 0%, rgb(139, 92, 246) 100%)";
-export const VIOLET = "#8b5cf6";
-export const PURPLE = "#a855f7";
-export const FUCHSIA = "#d946ef";
+// Re-export so callers that already import from here don't break.
+export { GRADIENT, GRADIENT_REVERSE, VIOLET, PURPLE, FUCHSIA };
 
 /* ── Hero ── */
 export const HERO_CONFIG = {
@@ -45,8 +48,8 @@ export const HOW_IT_WORKS_CONFIG = {
       description:
         "Click record and choose a screen, window, or browser tab. Frameful captures everything in HD with no time limit.",
       icon: Video,
-      color: VIOLET,
-      bgColor: "rgba(139, 92, 246, 0.08)",
+      color: STEP_COLORS.record.color,
+      bgColor: STEP_COLORS.record.bgColor,
     },
     {
       number: "02",
@@ -54,8 +57,8 @@ export const HOW_IT_WORKS_CONFIG = {
       description:
         "Pick a beautiful background from the gallery or upload your own. Trim the timeline to keep only what matters.",
       icon: Palette,
-      color: PURPLE,
-      bgColor: "rgba(168, 85, 247, 0.08)",
+      color: STEP_COLORS.customize.color,
+      bgColor: STEP_COLORS.customize.bgColor,
     },
     {
       number: "03",
@@ -63,8 +66,8 @@ export const HOW_IT_WORKS_CONFIG = {
       description:
         "Hit download and your edited video renders locally in .webm format — fast, private, and ready to share.",
       icon: Download,
-      color: FUCHSIA,
-      bgColor: "rgba(217, 70, 239, 0.08)",
+      color: STEP_COLORS.export.color,
+      bgColor: STEP_COLORS.export.bgColor,
     },
   ] satisfies Step[],
 };
@@ -103,10 +106,7 @@ export const COMING_SOON_CONFIG = {
       status: "Planned",
     },
   ] satisfies UpcomingItem[],
-  statusColors: {
-    "In Development": { bg: "rgba(139, 92, 246, 0.1)", text: VIOLET },
-    Planned: { bg: "rgba(217, 70, 239, 0.1)", text: FUCHSIA },
-  } satisfies Record<ItemStatus, { bg: string; text: string }>,
+  statusColors: STATUS_COLORS,
 };
 
 /* ── Waitlist ── */
@@ -136,7 +136,6 @@ export const FOOTER_CONFIG = {
   copyright: "© 2026 Frameful. All rights reserved.",
   links: [
     { label: "Privacy", href: "/privacy", internal: true },
-    // { label: "Terms", href: "#", internal: false },
     { label: "Twitter", href: "https://x.com/dev_palwar2", internal: false },
     {
       label: "GitHub",

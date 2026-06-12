@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Mail, ArrowRight, Sparkles, Loader2, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { WAITLIST_CONFIG } from "@/configs/landing.config";
+import { Typography } from "@/design-system/Typography";
 
 type FormState = "idle" | "submitting" | "success" | "error";
 
@@ -26,12 +27,8 @@ export default function WaitlistSection() {
         body: JSON.stringify({ email }),
       });
 
-      if (res.ok) {
-        setState("success");
-        setEmail("");
-      } else {
-        setState("error");
-      }
+      setState(res.ok ? "success" : "error");
+      if (res.ok) setEmail("");
     } catch {
       setState("error");
     }
@@ -40,14 +37,8 @@ export default function WaitlistSection() {
   return (
     <section className="py-20 md:py-28">
       <div className="mx-auto max-w-5xl px-6">
-        <div
-          className="relative overflow-hidden rounded-2xl px-8 py-16 text-center text-white md:px-16"
-          style={{
-            background:
-              "linear-gradient(135deg, rgb(139, 92, 246) 0%, rgb(167, 78, 243) 40%, rgb(217, 70, 239) 100%)",
-          }}
-        >
-          {/* Decorative blobs */}
+        <div className="relative overflow-hidden rounded-2xl px-8 py-16 text-center text-primary-foreground md:px-16 bg-brand-gradient">
+          {/* Decorative blobs — subdued, no shadows */}
           <div className="pointer-events-none absolute inset-0 z-0">
             <div className="absolute -top-20 -left-20 h-60 w-60 bg-white/5 blur-3xl" />
             <div className="absolute -bottom-20 -right-20 h-60 w-60 bg-white/5 blur-3xl" />
@@ -55,24 +46,29 @@ export default function WaitlistSection() {
 
           <div className="relative z-10">
             {/* Badge */}
-            <div className="mx-auto mb-4 inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1.5 text-xs font-medium backdrop-blur-sm">
+            <div className="mx-auto mb-4 inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1.5 backdrop-blur-sm">
               <Mail className="h-3.5 w-3.5" />
-              {cfg.badgeLabel}
+              <Typography variant="label">{cfg.badgeLabel}</Typography>
             </div>
 
-            <h2 className="text-3xl font-bold tracking-tight md:text-4xl">
+            <Typography variant="h2" as="h2">
               {cfg.headline}
-            </h2>
+            </Typography>
 
-            <p className="mx-auto mt-4 max-w-lg text-lg text-white/80">
+            <Typography
+              variant="body"
+              className="mx-auto mt-4 max-w-lg text-white/80"
+            >
               {cfg.subtext}
-            </p>
+            </Typography>
 
             {state === "success" ? (
               <div className="mx-auto mt-8 max-w-md animate-fade-up">
-                <div className="flex items-center justify-center gap-2 rounded-lg border border-white/20 bg-white/10 px-6 py-4 text-sm font-medium backdrop-blur-sm">
+                <div className="flex items-center justify-center gap-2 rounded-lg border border-white/20 bg-white/10 px-6 py-4 backdrop-blur-sm">
                   <Sparkles className="h-4 w-4" />
-                  {cfg.successMessage}
+                  <Typography variant="body-sm" className="font-medium">
+                    {cfg.successMessage}
+                  </Typography>
                 </div>
               </div>
             ) : (
@@ -81,29 +77,30 @@ export default function WaitlistSection() {
                 className="mx-auto mt-8 flex max-w-md flex-col gap-3 sm:flex-row"
               >
                 <input
+                  id="waitlist-email-input"
                   type="email"
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   disabled={state === "submitting"}
                   placeholder={cfg.inputPlaceholder}
-                  className="flex-1 rounded-md border border-white/20 bg-white/10 px-4 py-3 text-sm text-white placeholder-white/50 backdrop-blur-sm outline-none transition-colors focus:border-white/40 focus:bg-white/15 disabled:opacity-60"
+                  className="flex-1 rounded-md border border-white/20 bg-white/10 px-4 py-3 text-white placeholder-white/50 backdrop-blur-sm outline-none transition-colors focus:border-white/40 focus:bg-white/15 disabled:opacity-60 type-body-sm"
                 />
                 <Button
+                  id="waitlist-submit-btn"
                   type="submit"
                   size="lg"
                   disabled={state === "submitting"}
-                  className="gap-2 bg-white px-8 text-sm font-semibold shadow-lg hover:bg-white/90 disabled:opacity-70"
-                  style={{ color: "#7c3aed" }}
+                  className="gap-2 bg-white px-8 font-semibold hover:bg-white/90 disabled:opacity-70 text-primary"
                 >
                   {state === "submitting" ? (
                     <>
                       <Loader2 className="h-4 w-4 animate-spin" />
-                      Sending…
+                      <Typography variant="body-sm">Sending…</Typography>
                     </>
                   ) : (
                     <>
-                      {cfg.ctaLabel}
+                      <Typography variant="body-sm">{cfg.ctaLabel}</Typography>
                       <ArrowRight className="h-4 w-4" />
                     </>
                   )}
@@ -112,13 +109,15 @@ export default function WaitlistSection() {
             )}
 
             {state === "error" && (
-              <p className="mt-3 flex items-center justify-center gap-1.5 text-sm text-white/70">
+              <div className="mt-3 flex items-center justify-center gap-1.5 text-white/70">
                 <AlertCircle className="h-4 w-4" />
-                {cfg.errorMessage}
-              </p>
+                <Typography variant="caption">{cfg.errorMessage}</Typography>
+              </div>
             )}
 
-            <p className="mt-4 text-sm text-white/50">{cfg.disclaimer}</p>
+            <Typography variant="caption" className="mt-4 text-white/50">
+              {cfg.disclaimer}
+            </Typography>
           </div>
         </div>
       </div>

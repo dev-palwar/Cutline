@@ -1,34 +1,27 @@
 import { Link } from "react-router";
 import { FOOTER_CONFIG } from "@/configs/landing.config";
+import { Typography } from "@/design-system/Typography";
 
 export default function Footer() {
   const { brandName, copyright, links } = FOOTER_CONFIG;
 
   return (
-    <footer className="border-t border-border/50">
+    <footer className="border-t border-border">
       <div className="mx-auto max-w-6xl px-6 py-10">
         <div className="flex flex-col items-center justify-between gap-8 sm:flex-row">
           {/* Brand */}
-          <div className="flex items-center gap-2.5">
-            {/* <div
-              className="flex h-7 w-7 items-center justify-center rounded-md"
-              style={{ background: GRADIENT }}
-            >
-              <Layers className="h-3.5 w-3.5 text-white" />
-            </div> */}
-            <span className="bg-chart-1 text-white px-4 py-1 capitalize text-sm font-semibold tracking-tight">
-              {brandName}
-            </span>
-          </div>
+          <span className="bg-brand-gradient text-primary-foreground px-3 py-1 type-label tracking-widest uppercase">
+            {brandName}
+          </span>
 
           {/* Links */}
-          <div className="flex items-center gap-6 text-sm text-muted-foreground">
+          <div className="flex items-center gap-6">
             {links.map((link) =>
               link.internal ? (
                 <Link
                   key={link.label}
                   to={link.href}
-                  className="transition-colors hover:text-foreground"
+                  className="type-body-sm text-muted-foreground hover:text-foreground transition-colors"
                 >
                   {link.label}
                 </Link>
@@ -37,7 +30,8 @@ export default function Footer() {
                   key={link.label}
                   href={link.href}
                   target="_blank"
-                  className="transition-colors hover:text-foreground"
+                  rel="noopener noreferrer"
+                  className="type-body-sm text-muted-foreground hover:text-foreground transition-colors"
                 >
                   {link.label}
                 </a>
@@ -46,7 +40,9 @@ export default function Footer() {
           </div>
 
           {/* Copyright */}
-          <p className="text-xs text-muted-foreground">{copyright}</p>
+          <Typography variant="caption" className="text-muted-foreground">
+            {copyright}
+          </Typography>
         </div>
       </div>
     </footer>

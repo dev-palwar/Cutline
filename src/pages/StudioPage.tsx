@@ -2,10 +2,11 @@ import { useNavigate } from "react-router";
 import { ArrowLeft, Download } from "lucide-react";
 import { useRef, useState } from "react";
 import { useRecorder } from "@/hooks/useRecorder";
-import ToolBar from "@/components/shared/ToolBar";
+import ToolBar from "@/components/toolbar/ToolBar";
 import VideoPlayer, {
   type VideoPlayerHandle,
 } from "@/components/video/VideoPlayer";
+import { Typography } from "@/design-system/Typography";
 
 export default function StudioPage() {
   const navigate = useNavigate();
@@ -77,7 +78,7 @@ export default function StudioPage() {
           ]);
         }
       } catch {
-        // No audio available — export video-only
+        // No audio — export video-only
       }
 
       const mimeType = MediaRecorder.isTypeSupported("video/webm;codecs=vp9")
@@ -185,70 +186,62 @@ export default function StudioPage() {
     }
   };
 
-  // if (!videoUrl) return <NoVideo />;
-
   return (
     <div className="min-h-screen flex flex-col">
-      {/* Studio Header */}
-      <div className="h-14 border-b border-border/50 bg-card/80 backdrop-blur-xl flex items-center px-6 gap-4 shrink-0">
+      {/* Studio header */}
+      <header className="h-14 border-b border-border bg-background/80 backdrop-blur-xl flex items-center px-6 gap-4 shrink-0">
         <button
           id="back-to-home-btn"
           onClick={handleGoBack}
-          className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+          className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
         >
           <ArrowLeft className="w-4 h-4" />
-          Back
+          <Typography variant="label" as="span">Back</Typography>
         </button>
         <div className="h-5 w-px bg-border" />
-        <h1 className="text-sm font-semibold bg-linear-to-r from-violet-500 to-fuchsia-500 bg-clip-text text-transparent">
+        <Typography variant="label" as="h1" className="text-brand-gradient font-semibold">
           Frameful Studio
-        </h1>
-      </div>
+        </Typography>
+      </header>
 
-      {/* Studio Layout — split screen */}
+      {/* Studio layout — split screen */}
       <div className="flex-1 flex flex-col lg:flex-row overflow-hidden">
-        {/* Left: Video Preview */}
-        <div className="flex-1 flex items-center justify-center p-6 lg:p-10 bg-black/2 dark:bg-black/20">
+        {/* Left: Video preview */}
+        <div className="flex-1 flex items-center justify-center p-6 lg:p-10 bg-muted/20">
           <div className="w-full max-w-4xl">
-            {/* Video Player with integrated background */}
-            <div className="bg-white/10 dark:bg-black/40 border border-white/20 overflow-hidden flex flex-col gap-8">
+            {/* Player card */}
+            <div className="border border-border bg-card overflow-hidden flex flex-col gap-8">
               <VideoPlayer
                 ref={videoPlayerRef}
                 videoUrl={videoUrl as string}
                 background={background}
               />
             </div>
+
             {/* Download CTA */}
             <button
               id="download-video-btn"
               onClick={handleDownload}
               disabled={isDownloading}
-              className="group relative w-full mt-4 py-3.5 font-semibold text-white text-sm overflow-hidden transition-all duration-300 active:scale-[0.99] cursor-pointer shadow-lg shadow-violet-500/25 disabled:opacity-70 disabled:cursor-not-allowed"
-              style={{
-                background: "linear-gradient(135deg, #8b5cf6 0%, #d946ef 100%)",
-              }}
+              className="w-full mt-4 py-3.5 bg-brand-gradient text-primary-foreground cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
-              <span className="relative z-10 flex items-center justify-center gap-2">
-                <Download
-                  className={`w-4 h-4 transition-transform duration-300 ${
-                    isDownloading
-                      ? "animate-bounce"
-                      : "group-hover:translate-y-0.5"
-                  }`}
-                />
-                {isDownloading
-                  ? "Exporting edited video..."
-                  : "Download Edited Video"}
-              </span>
-              <div className="absolute inset-0 bg-white/0 group-hover:bg-white/10 transition-colors duration-300 rounded-xl" />
+              <Download
+                className={`w-4 h-4 ${isDownloading ? "animate-bounce" : ""}`}
+              />
+              <Typography variant="label" as="span">
+                {isDownloading ? "Exporting edited video…" : "Download Edited Video"}
+              </Typography>
             </button>
-            <p className="text-xs text-muted-foreground mt-2 text-center">
+            <Typography
+              variant="caption"
+              className="text-muted-foreground mt-2 text-center block"
+            >
               Your recorded screen capture · .webm format
-            </p>
+            </Typography>
           </div>
         </div>
 
-        {/* Right: Tools Panel */}
+        {/* Right: Tools panel */}
         <ToolBar onBackgroundSelect={setBackground} />
       </div>
     </div>

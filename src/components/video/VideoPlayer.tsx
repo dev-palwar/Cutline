@@ -7,6 +7,7 @@ import {
 } from "react";
 import Timeline from "./Timeline";
 import { Play, Pause } from "lucide-react";
+import { Typography } from "@/design-system/Typography";
 
 export interface VideoPlayerHandle {
   trimStart: number;
@@ -23,39 +24,29 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
   function VideoPlayer({ videoUrl, background = "", className = "" }, ref) {
     const videoRef = useRef<HTMLVideoElement>(null);
 
-    // Video state
     const [duration, setDuration] = useState<number>(0);
     const [currentTime, setCurrentTime] = useState<number>(0);
     const [isPlaying, setIsPlaying] = useState<boolean>(false);
-
-    // Trim state
     const [trimStart, setTrimStart] = useState<number>(0);
     const [trimEnd, setTrimEnd] = useState<number>(0);
 
-    // Expose trim values to parent for export
-    useImperativeHandle(ref, () => ({ trimStart, trimEnd }), [
-      trimStart,
-      trimEnd,
-    ]);
+    useImperativeHandle(ref, () => ({ trimStart, trimEnd }), [trimStart, trimEnd]);
 
-    // Extract duration when video metadata loads
     useEffect(() => {
       const video = videoRef.current;
       if (!video) return;
 
       const handleLoadedMetadata = () => {
-        const videoDuration = video.duration;
-        setDuration(videoDuration);
+        const d = video.duration;
+        setDuration(d);
         setTrimStart(0);
-        setTrimEnd(videoDuration);
+        setTrimEnd(d);
       };
 
       video.addEventListener("loadedmetadata", handleLoadedMetadata);
-      return () =>
-        video.removeEventListener("loadedmetadata", handleLoadedMetadata);
+      return () => video.removeEventListener("loadedmetadata", handleLoadedMetadata);
     }, [videoUrl]);
 
-    // Handle playback and auto-stop at trim end
     useEffect(() => {
       const video = videoRef.current;
       if (!video) return;
@@ -63,12 +54,10 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
       const handleTimeUpdate = () => {
         const current = video.currentTime;
         setCurrentTime(current);
-
-        // Auto-stop at trim end
         if (current >= trimEnd) {
           video.pause();
           setIsPlaying(false);
-          video.currentTime = trimStart; // Reset to trim start
+          video.currentTime = trimStart;
         }
       };
 
@@ -93,7 +82,6 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
       if (isPlaying) {
         video.pause();
       } else {
-        // Start from trim start if not within trim range
         if (video.currentTime < trimStart || video.currentTime >= trimEnd) {
           video.currentTime = trimStart;
         }
@@ -103,17 +91,17 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
 
     return (
       <>
-        {/* 16:9 Cinematic Preview - Video + Background Composition */}
+        {/* 16:9 Cinematic Preview */}
         <div className="relative w-full" style={{ paddingBottom: "56.25%" }}>
-          {/* Blurred Background Layer */}
+          {/* Blurred background layer */}
           <div
-            className="absolute inset-0 bg-cover bg-center scale-100 blur-[1px] opacity-80"
+            className="absolute inset-0 bg-cover bg-center blur-[1px] opacity-80"
             style={{
               backgroundImage: background ? `url(${background})` : "none",
             }}
           />
 
-          {/* Video Layer */}
+          {/* Video layer */}
           <div
             className={`absolute inset-0 flex items-center justify-center p-3 sm:p-5 lg:p-8 ${className}`}
           >
@@ -121,14 +109,13 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
               ref={videoRef}
               id="studio-video-player"
               src={videoUrl}
-              className="w-full h-full object-contain rounded-lg shadow-lg shadow-black/30"
+              className="w-full h-full object-contain rounded-md"
             />
           </div>
         </div>
 
-        {/* Controls Section - Separate Below */}
-        <div className="space-y-4 px-6 pt-2 pb-5 bg-linear-to-b from-transparent to-black/5">
-          {/* Timeline */}
+        {/* Controls — below the video */}
+        <div className="space-y-4 px-6 pt-2 pb-5">
           {duration > 0 && (
             <Timeline
               duration={duration}
@@ -140,29 +127,24 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
             />
           )}
 
-          {/* Play/Pause Button */}
+          {/* Play / Pause */}
           <div className="flex items-center justify-center">
             <button
+              id="studio-play-pause-btn"
               onClick={handlePlayPause}
-              className="group relative px-8 py-3.5 font-semibold text-white text-sm overflow-hidden transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] cursor-pointer shadow-lg shadow-violet-500/20"
-              style={{
-                background: "linear-gradient(135deg, #8b5cf6 0%, #d946ef 100%)",
-              }}
+              className="inline-flex items-center gap-2 px-8 py-3 bg-brand-gradient text-primary-foreground cursor-pointer type-label"
             >
-              <span className="relative z-10 flex items-center gap-2">
-                {isPlaying ? (
-                  <>
-                    <Pause className="w-4 h-4" fill="currentColor" />
-                    Pause
-                  </>
-                ) : (
-                  <>
-                    <Play className="w-4 h-4" fill="currentColor" />
-                    Play Trimmed
-                  </>
-                )}
-              </span>
-              <div className="absolute inset-0 bg-white/0 group-hover:bg-white/10 transition-colors duration-300" />
+              {isPlaying ? (
+                <>
+                  <Pause className="w-4 h-4" fill="currentColor" />
+                  <Typography variant="label" as="span">Pause</Typography>
+                </>
+              ) : (
+                <>
+                  <Play className="w-4 h-4" fill="currentColor" />
+                  <Typography variant="label" as="span">Play Trimmed</Typography>
+                </>
+              )}
             </button>
           </div>
         </div>

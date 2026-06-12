@@ -1,4 +1,5 @@
-import { HOW_IT_WORKS_CONFIG } from "@/configs/landing.config";
+import { HOW_IT_WORKS_CONFIG, GRADIENT } from "@/configs/landing.config";
+import { Typography } from "@/design-system/Typography";
 
 export default function HowItWorksSection() {
   const { sectionLabel, headline, subtext, steps } = HOW_IT_WORKS_CONFIG;
@@ -6,35 +7,31 @@ export default function HowItWorksSection() {
   return (
     <section id="how-it-works" className="py-20 md:py-28">
       <div className="mx-auto max-w-5xl px-6">
+        {/* Section header */}
         <div className="mx-auto max-w-2xl text-center">
-          <p
-            className="text-sm font-medium tracking-wide uppercase"
-            style={{ color: "#8b5cf6" }}
-          >
+          <Typography variant="overline" className="text-primary">
             {sectionLabel}
-          </p>
-          <h2 className="mt-3 text-3xl font-bold tracking-tight md:text-4xl">
+          </Typography>
+          <Typography variant="h2" as="h2" className="mt-3 text-foreground">
             {headline}
-          </h2>
-          <p className="mt-4 text-muted-foreground">{subtext}</p>
+          </Typography>
+          <Typography variant="body" className="mt-4 text-muted-foreground">
+            {subtext}
+          </Typography>
         </div>
 
         <div className="relative mt-16 grid gap-8 md:grid-cols-3">
-          {/* Connecting gradient line */}
+          {/* Connecting line */}
           <div
-            className="absolute top-16 left-[16.6%] right-[16.6%] hidden h-px md:block"
-            style={{
-              background:
-                "linear-gradient(90deg, rgb(139, 92, 246) 0%, rgb(217, 70, 239) 50%, rgb(139, 92, 246) 100%)",
-              opacity: 0.3,
-            }}
+            className="absolute top-16 left-[16.6%] right-[16.6%] hidden h-px md:block opacity-30"
+            style={{ background: GRADIENT }}
           />
 
           {steps.map((step, i) => (
             <div key={i} className="relative text-center">
-              {/* Icon */}
+              {/* Icon container */}
               <div
-                className="relative mx-auto mb-6 flex h-14 w-14 items-center justify-center rounded-2xl border-2 transition-colors duration-200"
+                className="relative mx-auto mb-6 flex h-14 w-14 items-center justify-center rounded-xl border border-border"
                 style={{
                   backgroundColor: step.bgColor,
                   color: step.color,
@@ -43,17 +40,24 @@ export default function HowItWorksSection() {
                 <step.icon className="h-6 w-6" />
               </div>
 
-              <div
-                className="mb-2 font-mono text-xs font-semibold tracking-widest"
-                style={{ color: step.color }}
+              {/* Step number */}
+              <Typography
+                variant="code"
+                className="mb-2 block"
+                style={{ color: step.color } as React.CSSProperties}
               >
                 STEP {step.number}
-              </div>
+              </Typography>
 
-              <h3 className="text-lg font-semibold">{step.title}</h3>
-              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+              <Typography variant="h3" as="h3" className="text-foreground">
+                {step.title}
+              </Typography>
+              <Typography
+                variant="body-sm"
+                className="mt-2 text-muted-foreground"
+              >
                 {step.description}
-              </p>
+              </Typography>
             </div>
           ))}
         </div>

@@ -1,4 +1,5 @@
 import { COMING_SOON_CONFIG } from "@/configs/landing.config";
+import { Typography } from "@/design-system/Typography";
 
 export default function ComingSoonSection() {
   const { sectionLabel, headline, subtext, items, statusColors } =
@@ -7,17 +8,17 @@ export default function ComingSoonSection() {
   return (
     <section className="py-20 md:py-28">
       <div className="mx-auto max-w-5xl px-6">
+        {/* Section header */}
         <div className="mx-auto max-w-2xl text-center">
-          <p
-            className="text-sm font-medium tracking-wide uppercase"
-            style={{ color: "#a855f7" }}
-          >
+          <Typography variant="overline" className="text-chart-2">
             {sectionLabel}
-          </p>
-          <h2 className="mt-3 text-3xl font-bold tracking-tight md:text-4xl">
+          </Typography>
+          <Typography variant="h2" as="h2" className="mt-3 text-foreground">
             {headline}
-          </h2>
-          <p className="mt-4 text-muted-foreground">{subtext}</p>
+          </Typography>
+          <Typography variant="body" className="mt-4 text-muted-foreground">
+            {subtext}
+          </Typography>
         </div>
 
         <div className="mt-14 grid gap-6 md:grid-cols-3">
@@ -26,24 +27,31 @@ export default function ComingSoonSection() {
             return (
               <div
                 key={i}
-                className="group relative rounded-xl border border-dashed border-border bg-card/50 p-6 transition-all duration-300 hover:border-[#8b5cf6]/40 hover:bg-card"
+                className="rounded-xl border border-dashed border-border bg-card/50 p-6 hover:bg-card transition-colors duration-200"
               >
                 {/* Status badge */}
                 <div
-                  className="mb-4 inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-medium tracking-wide uppercase"
+                  className="mb-4 inline-flex items-center gap-1.5 rounded-full px-2.5 py-1"
                   style={{ background: bg, color: text }}
                 >
                   <span
                     className="h-1.5 w-1.5 rounded-full animate-pulse"
                     style={{ backgroundColor: text }}
                   />
-                  {item.status}
+                  <Typography variant="overline" style={{ color: text } as React.CSSProperties}>
+                    {item.status}
+                  </Typography>
                 </div>
 
-                <h3 className="text-base font-semibold">{item.title}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                <Typography variant="h3" as="h3" className="text-foreground">
+                  {item.title}
+                </Typography>
+                <Typography
+                  variant="body-sm"
+                  className="mt-2 text-muted-foreground"
+                >
                   {item.description}
-                </p>
+                </Typography>
               </div>
             );
           })}
