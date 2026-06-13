@@ -1,5 +1,5 @@
-import { Image as ImageIcon } from "lucide-react";
-import { BackgroundTab } from "../tabs";
+import { Image as ImageIcon, Sliders as SlidersIcon } from "lucide-react";
+import { BackgroundTab, DesignTab } from "../tabs";
 import type { ToolBarTab } from "../types";
 
 /**
@@ -15,6 +15,11 @@ export const TABS: ToolBarTab[] = [
     subtitle: "Choose or upload a background image",
     panel:    BackgroundTab,
   },
-  // Future tabs:
-  // { id: "design", label: "Design", icon: SlidersIcon, subtitle: "…", panel: DesignTab },
+  { 
+    id: "design", 
+    label: "Design", 
+    icon: SlidersIcon, 
+    subtitle: "Customize your video appearance", 
+    panel: DesignTab 
+  },
 ];

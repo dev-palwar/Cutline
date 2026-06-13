@@ -1,8 +1,6 @@
 import { Routes, Route } from "react-router";
 import { LandingPage, StudioPage, RecordingPage, PrivacyPage } from "@/pages";
 
-// Route configuration
-// / renders LandingPage, /record renders RecordingScreen, /studio renders StudioPage
 export default function App() {
   return (
     <Routes>

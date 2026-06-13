@@ -9,6 +9,7 @@ import {
   useExportLayout,
 } from "./hooks";
 import type { ExportLayout } from "./hooks";
+import type { DesignSettings } from "../toolbar/types";
 
 export interface VideoPlayerHandle {
   trimStart: number;
@@ -22,10 +23,11 @@ interface VideoPlayerProps {
   videoUrl:    string;
   background?: string;
   className?:  string;
+  designSettings?: DesignSettings;
 }
 
 const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
-  function VideoPlayer({ videoUrl, background = "", className = "" }, ref) {
+  function VideoPlayer({ videoUrl, background = "", className = "", designSettings }, ref) {
     const [trimStart, setTrimStart] = useState(0);
     const [trimEnd,   setTrimEnd]   = useState(0);
 
@@ -47,12 +49,45 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
       trimStart, trimEnd, getExportLayout,
     ]);
 
+    const {
+      style = "default",
+      padding = 0,
+      opacity = 100,
+      borderStyle = "sharp",
+      radius = 0,
+      scale: designScale = 1.0,
+      shadow = "none"
+    } = designSettings || {};
+
+    const getStyleClasses = () => {
+      switch (style) {
+        case "glass-light": return "bg-white/10 backdrop-blur-md border border-white/20";
+        case "glass-dark": return "bg-black/40 backdrop-blur-md border border-white/10";
+        case "outline": return "bg-transparent border-2 border-white/20";
+        case "border": return "bg-white border-4 border-muted";
+        case "border-dark": return "bg-black/80 border-4 border-zinc-800";
+        default: return "";
+      }
+    };
+
+    const getShadowValue = () => {
+      switch (shadow) {
+        case "hug": return "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)";
+        case "soft": return "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)";
+        case "strong": return "0 25px 50px -12px rgba(0, 0, 0, 0.5)";
+        default: return "none";
+      }
+    };
+
+    const outerRadius = borderStyle === "sharp" ? 0 : borderStyle === "round" ? "9999px" : `${radius}px`;
+    const innerRadius = borderStyle === "sharp" ? 0 : borderStyle === "round" ? "9999px" : `${Math.max(0, radius - padding * 16)}px`;
+
     return (
       <>
         {/* 16:9 Cinematic Preview */}
         <div
           ref={containerRef}
-          className="relative w-full"
+          className="relative w-full overflow-hidden rounded-lg border border-border bg-black/40"
           style={{ paddingBottom: "56.25%" }}
         >
           {/* Blurred background layer */}
@@ -80,13 +115,24 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
               onMouseDown={startDrag}
               onClick={(e) => { e.stopPropagation(); setIsSelected(true); }}
             >
-              <video
-                ref={videoRef}
-                id="studio-video-player"
-                src={videoUrl}
-                className="w-full h-full object-contain rounded-md"
-                style={{ pointerEvents: "none", display: "block" }}
-              />
+              <div
+                className={`w-full h-full flex items-center justify-center transition-all overflow-hidden ${getStyleClasses()}`}
+                style={{
+                  padding: `${padding}rem`,
+                  borderRadius: outerRadius,
+                  opacity: opacity / 100,
+                  boxShadow: getShadowValue(),
+                  transform: `scale(${designScale})`,
+                }}
+              >
+                <video
+                  ref={videoRef}
+                  id="studio-video-player"
+                  src={videoUrl}
+                  className="w-full h-full object-contain"
+                  style={{ pointerEvents: "none", display: "block", borderRadius: innerRadius }}
+                />
+              </div>
 
               {/* Selection ring + resize handles */}
               {isSelected && (
@@ -136,7 +182,7 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
         </div>
 
         {/* Controls */}
-        <div className="space-y-4 px-6 pt-2 pb-5">
+        <div className="space-y-4 px-6 pt-6 pb-5 mt-4">
           {duration > 0 && (
             <Timeline
               duration={duration}
