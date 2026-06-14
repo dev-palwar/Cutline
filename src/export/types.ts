@@ -1,4 +1,5 @@
 import type { ExportLayout } from "@/components/video/hooks";
+import type { DesignSettings } from "@/components/toolbar/types";
 
 /**
  * Everything the export pipeline needs to produce the output file.
@@ -27,6 +28,10 @@ export interface ExportOptions {
   // ── Background ──────────────────────────────────────────────────────────────
   /** Data URL or object URL for the background image. Undefined = black fill. */
   backgroundUrl?: string;
+
+  // ── Design ──────────────────────────────────────────────────────────────────
+  /** All design tab settings — padding, shadow, blur, opacity, etc. */
+  designSettings: DesignSettings;
 
   // ── Output ──────────────────────────────────────────────────────────────────
   outputWidth:  number;

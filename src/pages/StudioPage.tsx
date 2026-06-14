@@ -65,6 +65,7 @@ export default function StudioPage() {
       outputWidth,
       outputHeight,
       crf: 22,
+      designSettings,
       ...layout,
     });
   };

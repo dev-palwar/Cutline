@@ -6,14 +6,10 @@ import type { ExportOptions, ExportState } from "../types";
 /**
  * useExport
  * ─────────────────────────────────────────────────────────────────────────────
- * The single public hook of the export pipeline. StudioPage is the only
- * consumer — it calls `exportVideo(opts)` and reads `isExporting`, `loadingWasm`,
- * and `progress` to drive the UI.
- *
- * Internally it:
- *   1. Lazy-loads the FFmpeg WASM binary on first call (shows loadingWasm)
- *   2. Registers the progress callback on the shared instance
- *   3. Delegates the actual work to `runExport` in the pipeline
+ * Two-phase export:
+ *  Phase 1 (0–50%): Canvas render — plays video in real time, composites all
+ *                   design effects frame-by-frame via Canvas 2D API.
+ *  Phase 2 (50–100%): FFmpeg encode — H.264 + AAC mux to MP4.
  */
 export function useExport(): ExportState & {
   exportVideo: (opts: ExportOptions) => Promise<void>;
@@ -28,14 +24,22 @@ export function useExport(): ExportState & {
 
     let ffmpeg;
     try {
-      ffmpeg = await getFFmpeg((p) => setProgress(p));
+      ffmpeg = await getFFmpeg((p) => {
+        // Phase 2: FFmpeg progress maps to 50–100%
+        setProgress(0.5 + p * 0.5);
+      });
     } finally {
       setLoadingWasm(false);
     }
 
     setIsExporting(true);
     try {
-      await runExport(ffmpeg, opts);
+      await runExport(
+        ffmpeg,
+        opts,
+        // Phase 1: canvas render maps to 0–50%
+        (p) => setProgress(p * 0.5),
+      );
     } finally {
       setIsExporting(false);
       setProgress(0);
