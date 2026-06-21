@@ -37,7 +37,7 @@ const DesignTab: React.FC<ToolBarProps> = ({ designSettings, setDesignSettings }
   const update = (key: keyof typeof designSettings, value: unknown) =>
     setDesignSettings((prev) => ({ ...prev, [key]: value }));
 
-  const { style, padding, opacity, borderStyle, radius, scale, shadow, shadowIntensity, aspectRatio, blur, blurAmount } = designSettings;
+  const { style, padding, opacity, borderStyle, radius, shadow, shadowIntensity, aspectRatio, blur, blurAmount } = designSettings;
 
   return (
     <div className="grid grid-cols-1 gap-2">

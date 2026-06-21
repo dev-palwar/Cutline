@@ -1,5 +1,6 @@
 import { useRef, useState, useEffect, useCallback } from "react";
 import { Typography } from "@/design-system/Typography";
+import { Play, Pause } from "lucide-react";
 
 interface TimelineProps {
   duration: number;
@@ -8,6 +9,9 @@ interface TimelineProps {
   currentTime: number;
   setTrimStart: (time: number) => void;
   setTrimEnd: (time: number) => void;
+  isPlaying: boolean;
+  onPlayPause: () => void;
+  onSeek: (time: number) => void;
 }
 
 const MIN_TRIM_DURATION = 1; // seconds
@@ -19,9 +23,12 @@ export default function Timeline({
   currentTime,
   setTrimStart,
   setTrimEnd,
+  isPlaying,
+  onPlayPause,
+  onSeek,
 }: TimelineProps) {
   const trackRef = useRef<HTMLDivElement>(null);
-  const [dragging, setDragging] = useState<"start" | "end" | null>(null);
+  const [dragging, setDragging] = useState<"start" | "end" | "playhead" | null>(null);
 
   const pixelToTime = useCallback(
     (pixel: number): number => {
@@ -47,8 +54,10 @@ export default function Timeline({
       const newTime = pixelToTime(getClientX(e));
       if (dragging === "start") {
         setTrimStart(Math.max(0, Math.min(newTime, trimEnd - MIN_TRIM_DURATION)));
-      } else {
+      } else if (dragging === "end") {
         setTrimEnd(Math.max(trimStart + MIN_TRIM_DURATION, Math.min(newTime, duration)));
+      } else if (dragging === "playhead") {
+        onSeek(Math.max(0, Math.min(newTime, duration)));
       }
     };
 
@@ -65,7 +74,7 @@ export default function Timeline({
       document.removeEventListener("touchmove", handleMove as EventListener);
       document.removeEventListener("touchend", handleUp);
     };
-  }, [dragging, trimStart, trimEnd, duration, setTrimStart, setTrimEnd, pixelToTime]);
+  }, [dragging, trimStart, trimEnd, duration, setTrimStart, setTrimEnd, pixelToTime, onSeek]);
 
   const formatTime = (seconds: number): string => {
     const mins = Math.floor(seconds / 60);
@@ -77,82 +86,101 @@ export default function Timeline({
   const endPercent = (trimEnd / duration) * 100;
   const playheadPercent = (currentTime / duration) * 100;
 
+  const handleTrackClick = (e: React.MouseEvent) => {
+    if (dragging) return;
+    const newTime = pixelToTime(e.clientX);
+    onSeek(newTime);
+  };
+
   return (
-    <div className="w-full space-y-3">
-      {/* Time labels */}
-      <div className="flex items-center justify-between gap-2">
-        <Typography variant="code" className="text-muted-foreground shrink-0">
-          {formatTime(trimStart)}
-        </Typography>
-        <Typography variant="caption" className="opacity-60 truncate text-center text-muted-foreground">
-          Duration: {formatTime(trimEnd - trimStart)}
-        </Typography>
-        <Typography variant="code" className="text-muted-foreground shrink-0">
-          {formatTime(trimEnd)}
+    <div className="w-full flex flex-col gap-4">
+      {/* Controls row */}
+      <div className="flex items-center gap-4">
+        <button
+          onClick={onPlayPause}
+          className="text-foreground hover:text-primary transition-colors focus:outline-none"
+          title={isPlaying ? "Pause" : "Play"}
+        >
+          {isPlaying ? <Pause className="w-5 h-5" fill="currentColor" /> : <Play className="w-5 h-5" fill="currentColor" />}
+        </button>
+        <Typography variant="code" className="text-muted-foreground select-none">
+          {formatTime(currentTime)} / {formatTime(duration)}
         </Typography>
       </div>
 
       {/* Timeline track */}
       <div
         ref={trackRef}
-        className="relative h-12 bg-muted/40 rounded-md overflow-visible cursor-pointer select-none border border-border"
+        className="relative h-16 bg-muted/20 rounded-md overflow-hidden cursor-pointer select-none border border-border/50"
+        onMouseDown={handleTrackClick}
       >
         {/* Dimmed regions outside trim */}
         <div
-          className="absolute top-0 bottom-0 left-0 bg-foreground/10"
+          className="absolute top-0 bottom-0 left-0 bg-black/60 z-10 pointer-events-none"
           style={{ width: `${startPercent}%` }}
         />
         <div
-          className="absolute top-0 bottom-0 right-0 bg-foreground/10"
+          className="absolute top-0 bottom-0 right-0 bg-black/60 z-10 pointer-events-none"
           style={{ width: `${100 - endPercent}%` }}
         />
 
-        {/* Selected region */}
+        {/* Selected region borders */}
         <div
-          className="absolute top-0 bottom-0 bg-primary/15 border-y-2 border-primary/50"
+          className="absolute top-0 bottom-0 border-y-2 border-primary z-10 pointer-events-none"
           style={{ left: `${startPercent}%`, width: `${endPercent - startPercent}%` }}
         />
 
+        {/* Placeholder video thumbnail background */}
+        <div className="absolute inset-0 bg-gradient-to-r from-zinc-800 to-zinc-700 opacity-30 pointer-events-none" />
+
         {/* Playhead */}
-        {currentTime >= trimStart && currentTime <= trimEnd && (
-          <div
-            className="absolute top-0 bottom-0 w-px bg-primary z-20"
-            style={{ left: `${playheadPercent}%` }}
-          >
-            <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-primary rounded-full" />
-          </div>
-        )}
+        <div
+          className="absolute top-0 bottom-0 w-px bg-primary z-30 flex justify-center cursor-ew-resize group"
+          style={{ left: `${playheadPercent}%` }}
+          onMouseDown={(e) => {
+            e.stopPropagation();
+            setDragging("playhead");
+          }}
+          onTouchStart={(e) => {
+            e.stopPropagation();
+            setDragging("playhead");
+          }}
+        >
+          <div className="absolute -top-1 w-3 h-3 bg-primary rounded-full shadow-sm group-hover:scale-125 transition-transform" />
+          <div className="absolute inset-y-0 w-4 -ml-2" /> {/* Extended hit area */}
+        </div>
 
         {/* Start handle */}
         <div
-          className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 z-30 cursor-ew-resize"
-          style={{ left: `${startPercent}%` }}
-          onMouseDown={() => setDragging("start")}
-          onTouchStart={() => setDragging("start")}
+          className="absolute top-0 bottom-0 w-4 bg-primary z-40 cursor-ew-resize flex items-center justify-center group"
+          style={{ left: `calc(${startPercent}% - 8px)` }}
+          onMouseDown={(e) => {
+            e.stopPropagation();
+            setDragging("start");
+          }}
+          onTouchStart={(e) => {
+            e.stopPropagation();
+            setDragging("start");
+          }}
         >
-          <div className="w-4 h-10 bg-card border-2 border-primary rounded-sm flex items-center justify-center">
-            <div className="w-px h-5 bg-primary/50 rounded-full" />
-          </div>
+          <div className="w-1 h-6 bg-primary-foreground/60 rounded-full group-hover:bg-primary-foreground transition-colors" />
         </div>
 
         {/* End handle */}
         <div
-          className="absolute top-1/2 -translate-y-1/2 translate-x-1/2 z-30 cursor-ew-resize"
-          style={{ left: `${endPercent}%` }}
-          onMouseDown={() => setDragging("end")}
-          onTouchStart={() => setDragging("end")}
+          className="absolute top-0 bottom-0 w-4 bg-primary z-40 cursor-ew-resize flex items-center justify-center group"
+          style={{ left: `calc(${endPercent}% - 8px)` }}
+          onMouseDown={(e) => {
+            e.stopPropagation();
+            setDragging("end");
+          }}
+          onTouchStart={(e) => {
+            e.stopPropagation();
+            setDragging("end");
+          }}
         >
-          <div className="w-4 h-10 bg-card border-2 border-primary rounded-sm flex items-center justify-center">
-            <div className="w-px h-5 bg-primary/50 rounded-full" />
-          </div>
+          <div className="w-1 h-6 bg-primary-foreground/60 rounded-full group-hover:bg-primary-foreground transition-colors" />
         </div>
-      </div>
-
-      {/* Total duration */}
-      <div className="text-center">
-        <Typography variant="caption" className="text-muted-foreground/60">
-          Total: {formatTime(duration)}
-        </Typography>
       </div>
     </div>
   );

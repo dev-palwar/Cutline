@@ -131,16 +131,14 @@ export default function StudioPage() {
       {/* Studio layout — split screen */}
       <div className="flex-1 flex flex-col lg:flex-row overflow-hidden">
         {/* Left: Video preview */}
-        <div className="flex-1 flex flex-col items-center justify-center p-6 lg:p-10 bg-background min-h-0 min-w-0">
-          <div className="w-full max-w-5xl flex flex-col">
-            <VideoPlayer
-              ref={videoPlayerRef}
-              videoUrl={videoUrl as string}
-              background={background}
-              designSettings={designSettings}
-              frameSettings={frameSettings}
-            />
-          </div>
+        <div className="flex-1 flex flex-col bg-background min-h-0 min-w-0">
+          <VideoPlayer
+            ref={videoPlayerRef}
+            videoUrl={videoUrl as string}
+            background={background}
+            designSettings={designSettings}
+            frameSettings={frameSettings}
+          />
         </div>
 
         {/* Right: Tools panel */}

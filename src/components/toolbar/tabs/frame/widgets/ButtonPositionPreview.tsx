@@ -1,4 +1,3 @@
-import React from "react";
 
 interface ButtonPositionPreviewProps {
   /** "top-left" | "top-right" | "top-center" | "bottom-left" | "bottom-right" | "bottom-center" */
@@ -17,8 +16,6 @@ export const ButtonPositionPreview = ({ variant }: ButtonPositionPreviewProps) =
   const isTop = variant.startsWith("top");
   const isLeft = variant.endsWith("left");
   const isRight = variant.endsWith("right");
-  const isCenter = variant.endsWith("center");
-
   const justify = isLeft ? "flex-start" : isRight ? "flex-end" : "center";
 
   const bar = (

@@ -27,8 +27,6 @@ export const FrameWrapper = ({
     return <>{children}</>;
   }
 
-  const isMac = osFrame === "macos";
-
   const renderMacDots = () => {
     if (buttonControls === "none") return null;
     const showClose =
@@ -72,8 +70,6 @@ export const FrameWrapper = ({
   const isTop = buttonPosition.startsWith("top");
   const isLeft = buttonPosition.endsWith("left");
   const isRight = buttonPosition.endsWith("right");
-  const justify = isLeft ? "flex-start" : isRight ? "flex-end" : "center";
-
   // Theme and OS Frames
   const isLightOS = theme === "light";
   const iconColor = isLightOS ? "#8a8a8c" : "#98989a";

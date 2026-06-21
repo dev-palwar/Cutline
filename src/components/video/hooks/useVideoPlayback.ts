@@ -14,6 +14,7 @@ interface VideoPlaybackState {
   currentTime: number;
   isPlaying: boolean;
   handlePlayPause: () => void;
+  seekTo: (time: number) => void;
 }
 
 /**
@@ -46,18 +47,25 @@ export function useVideoPlayback({
     return () => video.removeEventListener("loadedmetadata", onLoaded);
   }, [videoUrl, setTrimStart, setTrimEnd]);
 
+  const lastTimeRef = useRef(0);
+
   // Track time and enforce trim boundaries
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
 
     const onTimeUpdate = () => {
-      setCurrentTime(video.currentTime);
-      if (video.currentTime >= trimEnd) {
+      const prevTime = lastTimeRef.current;
+      const currTime = video.currentTime;
+      setCurrentTime(currTime);
+
+      // Only pause and snap back if we naturally played across the trimEnd boundary
+      if (prevTime < trimEnd && currTime >= trimEnd && !video.paused) {
         video.pause();
         setIsPlaying(false);
         video.currentTime = trimStart;
       }
+      lastTimeRef.current = currTime;
     };
     const onPlay  = () => setIsPlaying(true);
     const onPause = () => setIsPlaying(false);
@@ -78,12 +86,15 @@ export function useVideoPlayback({
     if (isPlaying) {
       video.pause();
     } else {
-      if (video.currentTime < trimStart || video.currentTime >= trimEnd) {
-        video.currentTime = trimStart;
-      }
       video.play();
     }
   };
 
-  return { videoRef, duration, currentTime, isPlaying, handlePlayPause };
+  const seekTo = (time: number) => {
+    const video = videoRef.current;
+    if (!video) return;
+    video.currentTime = time;
+  };
+
+  return { videoRef, duration, currentTime, isPlaying, handlePlayPause, seekTo };
 }

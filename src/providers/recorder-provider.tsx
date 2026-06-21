@@ -125,7 +125,7 @@ export function RecorderProvider({ children }: { children: ReactNode }) {
       setRecordingState("preview");
       navigate("/studio");
     },
-    [videoUrl, navigate]
+    [videoUrl, navigate],
   );
 
   return (

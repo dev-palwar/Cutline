@@ -1,6 +1,4 @@
 import { forwardRef, useState, useImperativeHandle } from "react";
-import { Play, Pause } from "lucide-react";
-import { Typography } from "@/design-system";
 import Timeline from "./Timeline";
 import { HANDLES } from "./config";
 import { useVideoPlayback, useVideoTransform, useExportLayout } from "./hooks";
@@ -39,7 +37,7 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
     const [trimStart, setTrimStart] = useState(0);
     const [trimEnd, setTrimEnd] = useState(0);
 
-    const { videoRef, duration, currentTime, isPlaying, handlePlayPause } =
+    const { videoRef, duration, currentTime, isPlaying, handlePlayPause, seekTo } =
       useVideoPlayback({
         videoUrl,
         trimStart,
@@ -150,152 +148,156 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
           : `${Math.max(0, radius - padding * 16)}px`;
 
     return (
-      <>
-        {/* 16:9 Cinematic Preview */}
-        <div
-          ref={containerRef}
-          className="relative w-full overflow-hidden rounded-lg border border-border bg-black/40"
-          style={{ paddingBottom }}
-        >
-          {/* Blurred background layer */}
-          <div
-            className="absolute inset-0 bg-center opacity-80 bg-cover"
-            style={{
-              background: background.includes("gradient(")
-                ? background
-                : background
-                  ? `url(${background})`
-                  : "none",
-              backgroundSize: "cover",
-              backgroundPosition: "center",
-              filter: getBlurValue() !== "none" ? getBlurValue() : undefined,
-            }}
-          />
-
-          {/* Video layer */}
-          <div
-            className={`absolute inset-0 flex items-center justify-center p-3 sm:p-5 lg:p-8 overflow-hidden ${className}`}
-          >
+      <div className="flex-1 flex flex-col w-full h-full min-h-0">
+        {/* Preview Area */}
+        <div className="flex-1 flex items-center justify-center p-6 lg:p-10 min-h-0">
+          <div className="w-full max-w-5xl">
+            {/* 16:9 Cinematic Preview */}
             <div
-              ref={wrapperRef}
-              id="video-resize-wrapper"
-              style={{
-                position: "relative",
-                width: "100%",
-                height: "100%",
-                transform: `translate(${posX}px, ${posY}px) scale(${scale})`,
-                transformOrigin: "center center",
-                cursor: isSelected ? "move" : "default",
-                userSelect: "none",
-              }}
-              onMouseDown={startDrag}
-              onClick={(e) => {
-                e.stopPropagation();
-                setIsSelected(true);
-              }}
+              ref={containerRef}
+              className="relative w-full overflow-hidden rounded-lg border border-border bg-black/40"
+              style={{ paddingBottom }}
             >
+              {/* Blurred background layer */}
               <div
-                className={`w-full h-full flex items-center justify-center transition-all overflow-hidden ${getStyleClasses()}`}
+                className="absolute inset-0 bg-center opacity-80 bg-cover"
                 style={{
-                  padding: `${padding}rem`,
-                  borderRadius: outerRadius,
-                  opacity: opacity / 100,
-                  boxShadow: getShadowValue(),
-                  transform: `scale(${designScale})`,
+                  background: background.includes("gradient(")
+                    ? background
+                    : background
+                      ? `url(${background})`
+                      : "none",
+                  backgroundSize: "cover",
+                  backgroundPosition: "center",
+                  filter: getBlurValue() !== "none" ? getBlurValue() : undefined,
                 }}
+              />
+
+              {/* Video layer */}
+              <div
+                className={`absolute inset-0 flex items-center justify-center p-3 sm:p-5 lg:p-8 overflow-hidden ${className}`}
               >
-                <FrameWrapper
-                  settings={frameSettings}
-                  innerRadius={innerRadius}
+                <div
+                  ref={wrapperRef}
+                  id="video-resize-wrapper"
+                  style={{
+                    position: "relative",
+                    width: "100%",
+                    height: "100%",
+                    transform: `translate(${posX}px, ${posY}px) scale(${scale})`,
+                    transformOrigin: "center center",
+                    cursor: isSelected ? "move" : "default",
+                    userSelect: "none",
+                  }}
+                  onMouseDown={startDrag}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setIsSelected(true);
+                  }}
                 >
-                  <video
-                    ref={videoRef}
-                    id="studio-video-player"
-                    src={videoUrl}
-                    className="w-full h-full object-cover"
-                    style={{
-                      pointerEvents: "none",
-                      display: "block",
-                      borderRadius:
-                        frameSettings &&
-                        (frameSettings.osFrame !== "none" ||
-                          frameSettings.browserFrame !== "none")
-                          ? 0
-                          : innerRadius,
-                    }}
-                  />
-                </FrameWrapper>
-              </div>
-
-              {/* Selection ring + resize handles */}
-              {isSelected && (
-                <>
                   <div
+                    className={`w-full h-full flex items-center justify-center transition-all overflow-hidden ${getStyleClasses()}`}
                     style={{
-                      position: "absolute",
-                      inset: 0,
-                      border: "2px dashed hsl(var(--brand, 265 80% 65%))",
-                      borderRadius: "6px",
-                      pointerEvents: "none",
-                    }}
-                  />
-
-                  {/* Scale badge */}
-                  <div
-                    style={{
-                      position: "absolute",
-                      top: -28,
-                      left: "50%",
-                      transform: "translateX(-50%)",
-                      background: "hsl(var(--brand, 265 80% 65%))",
-                      color: "#fff",
-                      fontSize: 11,
-                      fontWeight: 600,
-                      letterSpacing: "0.05em",
-                      padding: "2px 8px",
-                      borderRadius: 4,
-                      whiteSpace: "nowrap",
-                      pointerEvents: "none",
+                      padding: `${padding}rem`,
+                      borderRadius: outerRadius,
+                      opacity: opacity / 100,
+                      boxShadow: getShadowValue(),
+                      transform: `scale(${designScale})`,
                     }}
                   >
-                    {scalePercent}%
+                    <FrameWrapper
+                      settings={frameSettings}
+                      innerRadius={innerRadius}
+                    >
+                      <video
+                        ref={videoRef}
+                        id="studio-video-player"
+                        src={videoUrl}
+                        className="w-full h-full object-cover"
+                        style={{
+                          pointerEvents: "none",
+                          display: "block",
+                          borderRadius:
+                            frameSettings &&
+                            frameSettings.osFrame !== "none"
+                              ? 0
+                              : innerRadius,
+                        }}
+                      />
+                    </FrameWrapper>
                   </div>
 
-                  {/* 8 resize handles */}
-                  {HANDLES.map((h) => (
-                    <div
-                      key={h.id}
-                      onMouseDown={(e) => startResize(e, h.dx, h.dy)}
-                      style={{
-                        position: "absolute",
-                        width: 10,
-                        height: 10,
-                        background: "hsl(var(--brand, 265 80% 65%))",
-                        border: "2px solid #fff",
-                        borderRadius: 2,
-                        cursor: h.cursor,
-                        zIndex: 10,
-                        ...("top" in h && { top: h.top }),
-                        ...("left" in h && { left: h.left }),
-                        ...("right" in h && { right: h.right }),
-                        ...("bottom" in h && { bottom: h.bottom }),
-                        transform:
-                          ("left" in h && h.left === "50%") ||
-                          ("top" in h && h.top === "50%")
-                            ? "translate(-50%, -50%)"
-                            : undefined,
-                      }}
-                    />
-                  ))}
-                </>
-              )}
+                  {/* Selection ring + resize handles */}
+                  {isSelected && (
+                    <>
+                      <div
+                        style={{
+                          position: "absolute",
+                          inset: 0,
+                          border: "2px dashed hsl(var(--brand, 265 80% 65%))",
+                          borderRadius: "6px",
+                          pointerEvents: "none",
+                        }}
+                      />
+
+                      {/* Scale badge */}
+                      <div
+                        style={{
+                          position: "absolute",
+                          top: -28,
+                          left: "50%",
+                          transform: "translateX(-50%)",
+                          background: "hsl(var(--brand, 265 80% 65%))",
+                          color: "#fff",
+                          fontSize: 11,
+                          fontWeight: 600,
+                          letterSpacing: "0.05em",
+                          padding: "2px 8px",
+                          borderRadius: 4,
+                          whiteSpace: "nowrap",
+                          pointerEvents: "none",
+                        }}
+                      >
+                        {scalePercent}%
+                      </div>
+
+                      {/* 8 resize handles */}
+                      {HANDLES.map((h) => (
+                        <div
+                          key={h.id}
+                          onMouseDown={(e) => startResize(e, h.dx, h.dy)}
+                          style={{
+                            position: "absolute",
+                            width: 10,
+                            height: 10,
+                            background: "hsl(var(--brand, 265 80% 65%))",
+                            border: "2px solid #fff",
+                            borderRadius: 2,
+                            cursor: h.cursor,
+                            zIndex: 10,
+                            ...("top" in h && { top: h.top }),
+                            ...("left" in h && { left: h.left }),
+                            ...("right" in h && { right: h.right }),
+                            ...("bottom" in h && { bottom: h.bottom }),
+                            transform:
+                              ("left" in h && h.left === "50%") ||
+                              ("top" in h && h.top === "50%")
+                                ? "translate(-50%, -50%)"
+                                : undefined,
+                          }}
+                        />
+                      ))}
+                    </>
+                  )}
+                </div>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Controls */}
-        <div className="space-y-4 px-6 pt-6 pb-5 mt-4">
-          {duration > 0 && (
+        {/* Timeline */}
+        {duration > 0 && (
+          <div className="w-full shrink-0 border-t border-border bg-card p-6">
             <Timeline
               duration={duration}
               trimStart={trimStart}
@@ -303,33 +305,13 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
               currentTime={currentTime}
               setTrimStart={setTrimStart}
               setTrimEnd={setTrimEnd}
+              isPlaying={isPlaying}
+              onPlayPause={handlePlayPause}
+              onSeek={seekTo}
             />
-          )}
-          <div className="flex items-center justify-center">
-            <button
-              id="studio-play-pause-btn"
-              onClick={handlePlayPause}
-              className="inline-flex items-center gap-2 px-8 py-3 bg-brand-gradient text-primary-foreground cursor-pointer type-label"
-            >
-              {isPlaying ? (
-                <>
-                  <Pause className="w-4 h-4" fill="currentColor" />
-                  <Typography variant="label" as="span">
-                    Pause
-                  </Typography>
-                </>
-              ) : (
-                <>
-                  <Play className="w-4 h-4" fill="currentColor" />
-                  <Typography variant="label" as="span">
-                    Play Trimmed
-                  </Typography>
-                </>
-              )}
-            </button>
           </div>
-        </div>
-      </>
+        )}
+      </div>
     );
   },
 );

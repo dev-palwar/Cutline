@@ -4,7 +4,6 @@ import { Section } from "../design/widgets/Section";
 import { OptionButton } from "../design/widgets/OptionButton";
 import {
   OsFramePreview,
-  BrowserFramePreview,
   ButtonControlPreview,
   ButtonPositionPreview,
 } from "./widgets";
@@ -90,7 +89,9 @@ const FrameTab: React.FC<ToolBarProps> = ({ frameSettings, setFrameSettings }) =
               label={THEME_LABELS[v]}
               isActive={frameSettings.theme === v}
               onClick={() => update("theme", v)}
-            />
+            >
+              {THEME_LABELS[v]}
+            </OptionButton>
           ))}
         </div>
       </Section>

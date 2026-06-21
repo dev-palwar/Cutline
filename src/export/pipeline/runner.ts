@@ -3,7 +3,6 @@ import { fetchFile } from "@ffmpeg/util";
 import type { ExportOptions } from "../types";
 import { computeLayout } from "./layout";
 import { renderToCanvasBlob } from "./canvasRender";
-import { buildArgs } from "./args";
 
 /**
  * Full export pipeline:
@@ -51,7 +50,7 @@ export async function runExport(
 
   // ── 5. Download ────────────────────────────────────────────────────────────
   const data = await ffmpeg.readFile("output.mp4");
-  triggerDownload(new Blob([data as ArrayBuffer], { type: "video/mp4" }));
+  triggerDownload(new Blob([data as unknown as ArrayBuffer], { type: "video/mp4" }));
 
   // ── 6. Cleanup ─────────────────────────────────────────────────────────────
   for (const f of ["rendered.webm", "input.webm", "output.mp4"]) {
