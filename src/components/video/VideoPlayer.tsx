@@ -1,11 +1,12 @@
 import { forwardRef, useState, useImperativeHandle } from "react";
 import Timeline from "./Timeline";
 import { HANDLES } from "./config";
-import { useVideoPlayback, useVideoTransform, useExportLayout } from "./hooks";
+import { useVideoPlayback, useVideoTransform, useExportLayout, useZoomTransform } from "./hooks";
 import type { ExportLayout } from "./hooks";
 import type { DesignSettings, FrameSettings } from "../toolbar/types";
 import { resolveRatio } from "../toolbar/tabs/design/widgets/AspectRatioSelect";
 import { FrameWrapper } from "./FrameWrapper";
+import type { ZoomEvent } from "@/lib/zoom";
 
 export interface VideoPlayerHandle {
   trimStart: number;
@@ -21,6 +22,9 @@ interface VideoPlayerProps {
   className?: string;
   designSettings?: DesignSettings;
   frameSettings?: FrameSettings;
+  zoomEvents?: ZoomEvent[];
+  onAddZoom?: (time: number) => void;
+  onDeleteZoom?: (id: string) => void;
 }
 
 const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
@@ -31,6 +35,9 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
       className = "",
       designSettings,
       frameSettings,
+      zoomEvents = [],
+      onAddZoom,
+      onDeleteZoom,
     },
     ref,
   ) {
@@ -67,6 +74,9 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
       posX,
       posY,
     });
+
+    // Zoom transform — computed fresh on every currentTime change
+    const zoomTransform = useZoomTransform(currentTime, zoomEvents);
 
     useImperativeHandle(ref, () => ({ trimStart, trimEnd, getExportLayout }), [
       trimStart,
@@ -222,6 +232,14 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
                             frameSettings.osFrame !== "none"
                               ? 0
                               : innerRadius,
+                          // Auto-zoom transform
+                          transform: zoomTransform
+                            ? `scale(${zoomTransform.scale})`
+                            : undefined,
+                          transformOrigin: zoomTransform
+                            ? `${zoomTransform.originX * 100}% ${zoomTransform.originY * 100}%`
+                            : "center center",
+                          transition: "transform 0.05s linear, transform-origin 0.05s linear",
                         }}
                       />
                     </FrameWrapper>
@@ -308,6 +326,9 @@ const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
               isPlaying={isPlaying}
               onPlayPause={handlePlayPause}
               onSeek={seekTo}
+              zoomEvents={zoomEvents}
+              onAddZoom={onAddZoom}
+              onDeleteZoom={onDeleteZoom}
             />
           </div>
         )}

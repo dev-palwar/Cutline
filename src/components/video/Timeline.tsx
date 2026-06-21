@@ -1,6 +1,9 @@
 import { useRef, useState, useEffect, useCallback } from "react";
 import { Typography } from "@/design-system/Typography";
-import { Play, Pause } from "lucide-react";
+import { Play, Pause, ZoomIn } from "lucide-react";
+import type { ZoomEvent } from "@/lib/zoom";
+import { DEFAULT_ZOOM_DURATION, DEFAULT_ZOOM_FACTOR } from "@/lib/zoom";
+import { ZoomChip } from "./ZoomChip";
 
 interface TimelineProps {
   duration: number;
@@ -12,6 +15,10 @@ interface TimelineProps {
   isPlaying: boolean;
   onPlayPause: () => void;
   onSeek: (time: number) => void;
+  // Zoom
+  zoomEvents?: ZoomEvent[];
+  onAddZoom?: (time: number) => void;
+  onDeleteZoom?: (id: string) => void;
 }
 
 const MIN_TRIM_DURATION = 1; // seconds
@@ -26,9 +33,13 @@ export default function Timeline({
   isPlaying,
   onPlayPause,
   onSeek,
+  zoomEvents = [],
+  onAddZoom,
+  onDeleteZoom,
 }: TimelineProps) {
   const trackRef = useRef<HTMLDivElement>(null);
   const [dragging, setDragging] = useState<"start" | "end" | "playhead" | null>(null);
+  const [selectedZoomId, setSelectedZoomId] = useState<string | null>(null);
 
   const pixelToTime = useCallback(
     (pixel: number): number => {
@@ -88,12 +99,19 @@ export default function Timeline({
 
   const handleTrackClick = (e: React.MouseEvent) => {
     if (dragging) return;
+    // Deselect any zoom chip
+    setSelectedZoomId(null);
     const newTime = pixelToTime(e.clientX);
     onSeek(newTime);
   };
 
+  const handleAddZoom = () => {
+    if (!onAddZoom) return;
+    onAddZoom(currentTime);
+  };
+
   return (
-    <div className="w-full flex flex-col gap-4">
+    <div className="w-full flex flex-col gap-3">
       {/* Controls row */}
       <div className="flex items-center gap-4">
         <button
@@ -106,21 +124,29 @@ export default function Timeline({
         <Typography variant="code" className="text-muted-foreground select-none">
           {formatTime(currentTime)} / {formatTime(duration)}
         </Typography>
+
+        {/* Zoom event count badge */}
+        {zoomEvents.length > 0 && (
+          <div className="ml-auto flex items-center gap-1.5 text-[11px] text-muted-foreground select-none">
+            <ZoomIn className="w-3 h-3" />
+            <span>{zoomEvents.length} zoom{zoomEvents.length !== 1 ? "s" : ""}</span>
+          </div>
+        )}
       </div>
 
       {/* Timeline track */}
       <div
         ref={trackRef}
-        className="relative h-16 bg-muted/20 rounded-md overflow-hidden cursor-pointer select-none border border-border/50"
+        className="relative h-16 bg-muted/20 rounded-md overflow-visible cursor-pointer select-none border border-border/50"
         onMouseDown={handleTrackClick}
       >
         {/* Dimmed regions outside trim */}
         <div
-          className="absolute top-0 bottom-0 left-0 bg-black/60 z-10 pointer-events-none"
+          className="absolute top-0 bottom-0 left-0 bg-black/60 z-10 pointer-events-none rounded-l-md"
           style={{ width: `${startPercent}%` }}
         />
         <div
-          className="absolute top-0 bottom-0 right-0 bg-black/60 z-10 pointer-events-none"
+          className="absolute top-0 bottom-0 right-0 bg-black/60 z-10 pointer-events-none rounded-r-md"
           style={{ width: `${100 - endPercent}%` }}
         />
 
@@ -131,7 +157,23 @@ export default function Timeline({
         />
 
         {/* Placeholder video thumbnail background */}
-        <div className="absolute inset-0 bg-gradient-to-r from-zinc-800 to-zinc-700 opacity-30 pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-r from-zinc-800 to-zinc-700 opacity-30 pointer-events-none rounded-md" />
+
+        {/* ── Zoom chips layer ───────────────────────────────────────────── */}
+        {zoomEvents.map((event) => (
+          <ZoomChip
+            key={event.id}
+            event={event}
+            duration={duration}
+            isSelected={selectedZoomId === event.id}
+            onSelect={setSelectedZoomId}
+            onDeselect={() => setSelectedZoomId(null)}
+            onDelete={(id) => {
+              setSelectedZoomId(null);
+              onDeleteZoom?.(id);
+            }}
+          />
+        ))}
 
         {/* Playhead */}
         <div
@@ -152,7 +194,7 @@ export default function Timeline({
 
         {/* Start handle */}
         <div
-          className="absolute top-0 bottom-0 w-4 bg-primary z-40 cursor-ew-resize flex items-center justify-center group"
+          className="absolute top-0 bottom-0 w-4 bg-primary z-40 cursor-ew-resize flex items-center justify-center group rounded-l-sm"
           style={{ left: `calc(${startPercent}% - 8px)` }}
           onMouseDown={(e) => {
             e.stopPropagation();
@@ -168,7 +210,7 @@ export default function Timeline({
 
         {/* End handle */}
         <div
-          className="absolute top-0 bottom-0 w-4 bg-primary z-40 cursor-ew-resize flex items-center justify-center group"
+          className="absolute top-0 bottom-0 w-4 bg-primary z-40 cursor-ew-resize flex items-center justify-center group rounded-r-sm"
           style={{ left: `calc(${endPercent}% - 8px)` }}
           onMouseDown={(e) => {
             e.stopPropagation();
@@ -182,6 +224,32 @@ export default function Timeline({
           <div className="w-1 h-6 bg-primary-foreground/60 rounded-full group-hover:bg-primary-foreground transition-colors" />
         </div>
       </div>
+
+      {/* ── Tools strip ──────────────────────────────────────────────────── */}
+      <div className="flex items-center gap-2 pt-0.5">
+        <span className="text-[10px] font-semibold tracking-widest text-muted-foreground/50 uppercase select-none">
+          Tools
+        </span>
+        <div className="w-px h-3 bg-border/60" />
+
+        {/* Add Zoom button */}
+        <button
+          id="add-zoom-btn"
+          onClick={handleAddZoom}
+          disabled={!onAddZoom}
+          className="flex items-center gap-1.5 px-2.5 py-1 rounded text-[11px] font-medium border border-border/60 bg-muted/30 text-muted-foreground hover:text-foreground hover:bg-muted/60 hover:border-border transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed select-none"
+          title="Add a zoom effect at the current playhead position"
+        >
+          <ZoomIn className="w-3 h-3" />
+          Add Zoom
+        </button>
+
+        {/* Zoom factor display — shows default */}
+        <span className="text-[10px] text-muted-foreground/50 select-none">
+          {DEFAULT_ZOOM_FACTOR}× · {DEFAULT_ZOOM_DURATION}s
+        </span>
+      </div>
     </div>
   );
 }
+
