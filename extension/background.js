@@ -1,5 +1,5 @@
 /**
- * background.js — Frameful Auto Zoom service worker
+ * background.js — Cutline Auto Zoom service worker
  */
 
 // ─── State ────────────────────────────────────────────────────────────────────
@@ -16,7 +16,7 @@ async function broadcastToTabs(message) {
   }
 }
 
-// ─── Messages from the Frameful web app (externally_connectable) ──────────────
+// ─── Messages from the Cutline web app (externally_connectable) ──────────────
 // IMPORTANT: The listener must return `true` synchronously to keep the
 // message channel open. Do NOT return from inside a switch block — the
 // `return true` must be the last statement in the listener function.
@@ -25,7 +25,10 @@ chrome.runtime.onMessageExternal.addListener(
     (async () => {
       switch (message.type) {
         case "PING":
-          sendResponse({ installed: true, version: chrome.runtime.getManifest().version });
+          sendResponse({
+            installed: true,
+            version: chrome.runtime.getManifest().version,
+          });
           break;
 
         case "START_SESSION":
@@ -47,7 +50,10 @@ chrome.runtime.onMessageExternal.addListener(
         }
 
         case "GET_STATUS":
-          sendResponse({ active: sessionActive, eventCount: clickEvents.length });
+          sendResponse({
+            active: sessionActive,
+            eventCount: clickEvents.length,
+          });
           break;
 
         default:
@@ -78,4 +84,3 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
   sendResponse({ ok: true });
   return false;
 });
-

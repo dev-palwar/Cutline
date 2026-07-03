@@ -37,7 +37,7 @@ export function RecorderProvider({ children }: { children: ReactNode }) {
   // Check extension presence on mount
   useEffect(() => {
     isExtensionInstalled().then((installed) => {
-      console.log('[Frameful] Extension installed:', installed);
+      console.log("[Cutline] Extension installed:", installed);
       setExtensionInstalled(installed);
     });
   }, []);
@@ -68,9 +68,9 @@ export function RecorderProvider({ children }: { children: ReactNode }) {
       streamRef.current = stream;
 
       // Tell the extension to start capturing clicks
-      console.log('[Frameful] startSession called');
+      console.log("[Cutline] startSession called");
       await startSession();
-      console.log('[Frameful] startSession done');
+      console.log("[Cutline] startSession done");
 
       // MediaRecorder setup — collects chunks on dataavailable, builds blob on stop
       const recorder = new MediaRecorder(stream);
@@ -85,11 +85,15 @@ export function RecorderProvider({ children }: { children: ReactNode }) {
 
       recorder.onstop = async () => {
         // Fetch click events from extension before doing anything else
-        console.log('[Frameful] Recording stopped, fetching clicks...');
+        console.log("[Cutline] Recording stopped, fetching clicks...");
         const clicks = await stopSession();
-        console.log('[Frameful] Clicks received:', clicks.length, clicks);
+        console.log("[Cutline] Clicks received:", clicks.length, clicks);
         const detectedZooms = clicksToZoomEvents(clicks);
-        console.log('[Frameful] Zoom events generated:', detectedZooms.length, detectedZooms);
+        console.log(
+          "[Cutline] Zoom events generated:",
+          detectedZooms.length,
+          detectedZooms,
+        );
 
         const recordedBlob = new Blob(chunksRef.current, {
           type: "video/webm",
@@ -182,4 +186,3 @@ export function RecorderProvider({ children }: { children: ReactNode }) {
     </RecorderContext.Provider>
   );
 }
-

@@ -1,6 +1,6 @@
 /**
  * extension-bridge.ts — Thin wrapper around chrome.runtime.sendMessage
- * for communicating with the Frameful Auto Zoom extension.
+ * for communicating with the Cutline Auto Zoom extension.
  *
  * All functions fail gracefully when the extension is not installed —
  * they return empty/null values rather than throwing.
@@ -45,7 +45,7 @@ function sendMessage<T>(message: Record<string, unknown>): Promise<T | null> {
 // ─── Public API ───────────────────────────────────────────────────────────────
 
 /**
- * Checks whether the Frameful extension is installed and reachable.
+ * Checks whether the Cutline extension is installed and reachable.
  * Safe to call on every page load — returns false if not installed.
  */
 export async function isExtensionInstalled(): Promise<boolean> {

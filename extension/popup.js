@@ -11,18 +11,22 @@ function updateUI({ active, eventCount }) {
     statusText.textContent = "Recording…";
     count.style.display = "block";
     count.textContent = `${eventCount} click${eventCount !== 1 ? "s" : ""}`;
-    hint.textContent = "Clicks are being captured. Stop recording in Frameful when done.";
+    hint.textContent =
+      "Clicks are being captured. Stop recording in Cutline when done.";
   } else {
     dot.classList.remove("active");
     statusText.textContent = "Idle";
     count.style.display = "none";
-    hint.textContent = "Start a recording in Frameful to begin capturing clicks.";
+    hint.textContent =
+      "Start a recording in Cutline to begin capturing clicks.";
   }
 }
 
 // Poll status from background every second while popup is open
 async function poll() {
-  const response = await chrome.runtime.sendMessage({ type: "GET_STATUS" }).catch(() => null);
+  const response = await chrome.runtime
+    .sendMessage({ type: "GET_STATUS" })
+    .catch(() => null);
   if (response) updateUI(response);
 }
 

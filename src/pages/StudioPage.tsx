@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router";
-import { ArrowLeft, Download, Loader2, ZoomIn } from "lucide-react";
+import { ArrowLeft, Loader2, ZoomIn } from "lucide-react";
 import { useRef, useState, useCallback } from "react";
 import { useRecorder } from "@/hooks";
 import { ToolBar } from "@/components/toolbar";
@@ -11,6 +11,8 @@ import type { DesignSettings, FrameSettings } from "@/components/toolbar/types";
 import { resolveRatio } from "@/components/toolbar/tabs/design/widgets/AspectRatioSelect";
 import type { ZoomEvent } from "@/lib/zoom";
 import { DEFAULT_ZOOM_DURATION, DEFAULT_ZOOM_FACTOR } from "@/lib/zoom";
+import { ExportDropdown } from "@/components/shared/ExportDropdown";
+import type { ExportPreset } from "@/components/shared/ExportDropdown";
 
 interface PlacingZoom {
   time: number;
@@ -43,7 +45,15 @@ export default function StudioPage() {
   });
   const videoPlayerRef = useRef<VideoPlayerHandle>(null);
 
-  const { videoUrl, blob, discardRecording, recordingState, zoomEvents, setZoomEvents, extensionInstalled } = useRecorder();
+  const {
+    videoUrl,
+    blob,
+    discardRecording,
+    recordingState,
+    zoomEvents,
+    setZoomEvents,
+    extensionInstalled,
+  } = useRecorder();
   const { exportVideo, isExporting, loadingWasm, progress } = useExport();
 
   // Whether this is a recorded video (not uploaded) — determines if we show extension banner
@@ -59,7 +69,9 @@ export default function StudioPage() {
 
   // Live update as user drags the focus indicator
   const handleFocusChange = useCallback((x: number, y: number) => {
-    setPlacingZoom((prev) => (prev ? { ...prev, originX: x, originY: y } : null));
+    setPlacingZoom((prev) =>
+      prev ? { ...prev, originX: x, originY: y } : null,
+    );
   }, []);
 
   // Confirm: create the ZoomEvent and exit placement mode
@@ -81,21 +93,38 @@ export default function StudioPage() {
   // Cancel placement without creating a zoom
   const handleCancelZoom = useCallback(() => setPlacingZoom(null), []);
 
-  const handleDeleteZoom = useCallback((id: string) => {
-    setZoomEvents(zoomEvents.filter((e) => e.id !== id));
-  }, [zoomEvents, setZoomEvents]);
+  const handleDeleteZoom = useCallback(
+    (id: string) => {
+      setZoomEvents(zoomEvents.filter((e) => e.id !== id));
+    },
+    [zoomEvents, setZoomEvents],
+  );
 
-  const handleUpdateZoomTime = useCallback((id: string, time: number) => {
-    setZoomEvents(zoomEvents.map((e) => (e.id === id ? { ...e, time } : e)));
-  }, [zoomEvents, setZoomEvents]);
+  const handleUpdateZoomTime = useCallback(
+    (id: string, time: number) => {
+      setZoomEvents(zoomEvents.map((e) => (e.id === id ? { ...e, time } : e)));
+    },
+    [zoomEvents, setZoomEvents],
+  );
 
   const handleGoBack = () => {
     discardRecording();
     navigate("/");
   };
 
-  const handleDownload = async () => {
+  const handleDownload = async (preset: ExportPreset) => {
     if (!videoUrl || !blob) return;
+
+    // Raw: just download the original blob directly, no processing
+    if (preset.isRaw) {
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `frameful-raw-${new Date().toISOString().slice(0, 10)}.webm`;
+      link.click();
+      setTimeout(() => URL.revokeObjectURL(url), 2000);
+      return;
+    }
 
     const layout = videoPlayerRef.current?.getExportLayout() ?? {
       scale: 1,
@@ -109,11 +138,18 @@ export default function StudioPage() {
       shadow: "none" as const,
     };
 
-    // Derive export canvas size from the chosen aspect ratio
+    // Derive export canvas size from the chosen aspect ratio + quality multiplier
     const BASE_W = 1280;
+    const scaledW = Math.round(BASE_W * preset.widthMultiplier);
+    // Make width even (H.264 requirement)
+    const outputWidth = scaledW % 2 === 0 ? scaledW : scaledW + 1;
     const numericRatio = resolveRatio(designSettings.aspectRatio);
-    const outputWidth = BASE_W;
-    const outputHeight = numericRatio ? Math.round(BASE_W / numericRatio) : 720;
+    const outputHeight = numericRatio
+      ? Math.round(outputWidth / numericRatio)
+      : Math.round((outputWidth * 9) / 16);
+    // Make height even too
+    const finalHeight =
+      outputHeight % 2 === 0 ? outputHeight : outputHeight + 1;
 
     await exportVideo({
       videoBlob: blob,
@@ -121,8 +157,8 @@ export default function StudioPage() {
       trimEnd: videoPlayerRef.current?.trimEnd ?? Infinity,
       backgroundUrl: background || undefined,
       outputWidth,
-      outputHeight,
-      crf: 22,
+      outputHeight: finalHeight,
+      crf: preset.crf,
       designSettings,
       zoomEvents,
       ...layout,
@@ -132,7 +168,7 @@ export default function StudioPage() {
   return (
     <div className="h-screen w-screen flex flex-col">
       {/* Studio header */}
-      <header className="h-14 border-b border-border bg-background/80 backdrop-blur-xl flex items-center justify-between px-6 shrink-0">
+      <header className="relative z-50 h-14 border-b border-border bg-background/80 backdrop-blur-xl flex items-center justify-between px-6 shrink-0">
         {/* Left side */}
         <div className="flex items-center gap-4">
           <button
@@ -141,11 +177,17 @@ export default function StudioPage() {
             className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
           >
             <ArrowLeft className="w-4 h-4" />
-            <Typography variant="label" as="span">Back</Typography>
+            <Typography variant="label" as="span">
+              Back
+            </Typography>
           </button>
           <div className="h-5 w-px bg-border" />
-          <Typography variant="label" as="h1" className="text-brand-gradient font-semibold">
-            Frameful Studio
+          <Typography
+            variant="label"
+            as="h1"
+            className="text-brand-gradient font-semibold"
+          >
+            Cutline Studio
           </Typography>
         </div>
 
@@ -154,7 +196,9 @@ export default function StudioPage() {
           {loadingWasm ? (
             <div className="py-1.5 px-3 border border-border bg-card flex items-center gap-2 rounded-md">
               <Loader2 className="w-3.5 h-3.5 animate-spin text-muted-foreground" />
-              <Typography variant="label" className="text-muted-foreground">Loading FFmpeg…</Typography>
+              <Typography variant="label" className="text-muted-foreground">
+                Loading FFmpeg…
+              </Typography>
             </div>
           ) : isExporting ? (
             <div className="py-1.5 px-3 border border-border bg-card rounded-md flex items-center gap-3 w-48">
@@ -165,17 +209,15 @@ export default function StudioPage() {
                   style={{ width: `${progress * 100}%` }}
                 />
               </div>
-              <Typography variant="caption">{Math.round(progress * 100)}%</Typography>
+              <Typography variant="caption">
+                {Math.round(progress * 100)}%
+              </Typography>
             </div>
           ) : (
-            <button
-              id="download-video-btn"
-              onClick={handleDownload}
-              className="py-1.5 px-5 bg-brand-gradient text-primary-foreground cursor-pointer flex items-center gap-2 rounded-md hover:opacity-90 transition-opacity"
-            >
-              <Download className="w-3.5 h-3.5" />
-              <Typography variant="label" as="span">Export Video</Typography>
-            </button>
+            <ExportDropdown
+              onExport={handleDownload}
+              disabled={!videoUrl || !blob}
+            />
           )}
         </div>
       </header>
@@ -199,7 +241,6 @@ export default function StudioPage() {
             onConfirmZoom={handleConfirmZoom}
             onCancelZoom={handleCancelZoom}
           />
-
         </div>
 
         {/* Extension install banner — only for recorded videos without extension */}
@@ -210,10 +251,10 @@ export default function StudioPage() {
               <Typography variant="caption" className="text-amber-500/80">
                 Install the{" "}
                 <a
-                  href="#"
+                  href="https://github.com/dev-palwar/Cutline"
                   className="underline underline-offset-2 pointer-events-auto hover:text-amber-400 transition-colors"
                 >
-                  Frameful extension
+                  Cutline extension
                 </a>{" "}
                 to enable auto-zoom detection from your clicks.
               </Typography>

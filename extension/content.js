@@ -1,5 +1,5 @@
 /**
- * content.js — Frameful Auto Zoom content script
+ * content.js — Cutline Auto Zoom content script
  *
  * Injected into every tab. When a recording session is active
  * (signalled by the background service worker), captures every

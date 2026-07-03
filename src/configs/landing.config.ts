@@ -19,7 +19,7 @@ export const HERO_CONFIG = {
   headlineStatic: "Record your screen.",
   headlineGradient: "Make it beautiful.",
   subtext:
-    "Frameful captures your screen, lets you pick a beautiful background, trim the timeline, and export a polished video — all in your browser. No sign-up, no uploads, fully private.",
+    "Cutline captures your screen, lets you pick a beautiful background, trim the timeline, and export a polished video — all in your browser. No sign-up, no uploads, fully private.",
   primaryCtaLabel: "Start recording — it's free",
   secondaryCtaLabel: "See how it works",
   browserSupportNote: "Works on Chrome, Edge, Brave & Firefox",
@@ -46,7 +46,7 @@ export const HOW_IT_WORKS_CONFIG = {
       number: "01",
       title: "Record",
       description:
-        "Click record and choose a screen, window, or browser tab. Frameful captures everything in HD with no time limit.",
+        "Click record and choose a screen, window, or browser tab. Cutline captures everything in HD with no time limit.",
       icon: Video,
       color: STEP_COLORS.record.color,
       bgColor: STEP_COLORS.record.bgColor,
@@ -83,7 +83,7 @@ export interface UpcomingItem {
 
 export const COMING_SOON_CONFIG = {
   sectionLabel: "Coming Soon",
-  headline: "What's next for Frameful.",
+  headline: "What's next for Cutline.",
   subtext:
     "We're actively building these features. Join the waitlist to get early access.",
   items: [
@@ -100,9 +100,9 @@ export const COMING_SOON_CONFIG = {
       status: "Planned",
     },
     {
-      title: "Frameful Extension",
+      title: "Cutline Extension",
       description:
-        "Install a lightweight browser extension to capture click events, annotate recordings, and trigger Frameful directly from any tab with a single shortcut.",
+        "Install a lightweight browser extension to capture click events, annotate recordings, and trigger Cutline directly from any tab with a single shortcut.",
       status: "Planned",
     },
   ] satisfies UpcomingItem[],
@@ -133,7 +133,7 @@ export interface FooterLink {
 
 export const FOOTER_CONFIG = {
   brandName: "frameful",
-  copyright: "© 2026 Frameful. All rights reserved.",
+  copyright: "© 2026 Cutline. All rights reserved.",
   links: [
     { label: "Privacy", href: "/privacy", internal: true },
     { label: "Twitter", href: "https://x.com/dev_palwar2", internal: false },

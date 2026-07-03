@@ -36,7 +36,7 @@ interface TypographyProps<T extends keyof React.JSX.IntrinsicElements = "p"> {
 /**
  * Typography
  * ──────────────────────────────────────────────────────────────────────────
- * The sole component for rendering text in Frameful.
+ * The sole component for rendering text in Cutline.
  *
  * Usage:
  *   <Typography variant="h2">Section Title</Typography>

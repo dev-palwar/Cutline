@@ -1,4 +1,4 @@
-# Frameful Design System
+# Cutline Design System
 
 > **Version 1.0** — Established June 2026
 > **Theme:** White + Purple (flat UI)

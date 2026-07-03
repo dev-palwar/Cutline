@@ -15,7 +15,9 @@ export default function PrivacyPage() {
             className="flex items-center gap-2 text-muted-foreground transition-colors hover:text-foreground cursor-pointer"
           >
             <ArrowLeft className="h-4 w-4" />
-            <Typography variant="label" as="span">Back to Frameful</Typography>
+            <Typography variant="label" as="span">
+              Back to Cutline
+            </Typography>
           </button>
         </div>
       </div>
@@ -41,7 +43,7 @@ export default function PrivacyPage() {
             The short version
           </Typography>
           <Typography variant="body" className="text-foreground">
-            Frameful runs entirely in your browser. We do not collect, store, or
+            Cutline runs entirely in your browser. We do not collect, store, or
             transmit your recordings, screen data, or any personal information.
             Your videos never leave your device.
           </Typography>
@@ -49,8 +51,8 @@ export default function PrivacyPage() {
 
         {/* Body sections */}
         <div className="space-y-10">
-          <Section title="1. What Frameful does">
-            Frameful is a client-side web application. When you record your
+          <Section title="1. What Cutline does">
+            Cutline is a client-side web application. When you record your
             screen, the video stream is captured and processed entirely inside
             your browser using standard Web APIs (
             <code className="rounded-sm bg-muted px-1 py-0.5 type-code text-foreground">
@@ -78,12 +80,12 @@ export default function PrivacyPage() {
           <Section title="3. Waitlist emails">
             If you choose to join our waitlist, you voluntarily provide your
             email address. This email is used solely to notify you about new
-            Frameful features. We will never sell, share, or use it for any
-            other purpose. You can ask to be removed at any time by emailing us.
+            Cutline features. We will never sell, share, or use it for any other
+            purpose. You can ask to be removed at any time by emailing us.
           </Section>
 
           <Section title="4. Third-party services">
-            Frameful loads fonts from Google Fonts via a standard{" "}
+            Cutline loads fonts from Google Fonts via a standard{" "}
             <code className="rounded-sm bg-muted px-1 py-0.5 type-code text-foreground">
               link
             </code>{" "}
@@ -94,7 +96,7 @@ export default function PrivacyPage() {
           </Section>
 
           <Section title="5. Local storage">
-            Frameful does not use{" "}
+            Cutline does not use{" "}
             <code className="rounded-sm bg-muted px-1 py-0.5 type-code text-foreground">
               localStorage
             </code>
@@ -108,12 +110,12 @@ export default function PrivacyPage() {
           </Section>
 
           <Section title="6. Children's privacy">
-            Frameful is not directed at children under 13 and we do not
-            knowingly collect information from anyone under 13.
+            Cutline is not directed at children under 13 and we do not knowingly
+            collect information from anyone under 13.
           </Section>
 
           <Section title="7. Changes to this policy">
-            We may update this policy as Frameful evolves. Any changes will be
+            We may update this policy as Cutline evolves. Any changes will be
             reflected here with an updated date at the top. We encourage you to
             review this page periodically.
           </Section>
@@ -146,7 +148,10 @@ function Section({
       <Typography variant="h4" as="h2" className="mb-3 text-foreground">
         {title}
       </Typography>
-      <Typography variant="body-sm" className="text-muted-foreground leading-relaxed">
+      <Typography
+        variant="body-sm"
+        className="text-muted-foreground leading-relaxed"
+      >
         {children}
       </Typography>
     </div>

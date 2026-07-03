@@ -203,7 +203,9 @@ export async function renderToCanvasBlob(
 
     // Clip to the video slot (respects border-radius)
     if (borderRadius > 0) {
-      clipRounded(ctx, vidX, vidY, vidW, vidH, Math.max(0, borderRadius - padding * 5) * scale);
+      // CSS formula: Math.max(0, radius - padding * 16) — padding is in rem, 1rem = 16px
+      const innerRadius = Math.max(0, borderRadius - padding * 16);
+      clipRounded(ctx, vidX, vidY, vidW, vidH, innerRadius * scale);
       ctx.clip();
     } else {
       // Always clip to slot bounds so zoom doesn't bleed outside the container

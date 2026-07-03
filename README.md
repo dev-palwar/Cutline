@@ -1,75 +1,34 @@
-# React + TypeScript + Vite
+# Cutline
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Cutline is a video editor and screen recorder designed for seamless zooming and professional exports.
 
-Currently, two official plugins are available:
+## 🧩 Shipping the Auto-Zoom Extension
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+The Cutline Auto-Zoom extension is a JavaScript extension located in the `extension/` directory. It requires no build step.
 
-## React Compiler
-
-The React Compiler is enabled on this template. See [this documentation](https://react.dev/learn/react-compiler) for more information.
-
-Note: This will impact Vite dev & build performances.
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+### 1. Package the Extension
+To package the extension for the Chrome Web Store, zip the **contents** of the `extension` directory (not the directory itself).
+You can run this command from the root of the project:
+```bash
+cd extension && zip -r ../cutline-extension.zip *
 ```
+This will create a `cutline-extension.zip` file in your project root.
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+### 2. Upload to Chrome Web Store
+1. Go to the [Chrome Developer Dashboard](https://chrome.google.com/webstore/devconsole/).
+2. Click **Add new item** (or update your existing item).
+3. Upload the `cutline-extension.zip` file.
+4. Fill out your store listing (Privacy Policy, Description, Screenshots, etc.).
+5. Submit for review!
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+### 3. Update the Environment Variable
+Once your extension is uploaded to the dashboard, it will be assigned a permanent **Extension ID** (a long string of lowercase letters).
+For the web application to communicate with it, you must add this ID to your environment variables:
+1. Open your `.env` (or `.env.local`) file.
+2. Add or update the following line:
+   ```env
+   VITE_EXTENSION_ID="your_assigned_extension_id"
+   ```
+3. Rebuild and deploy your web application.
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+---
