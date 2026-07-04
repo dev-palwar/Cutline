@@ -1,4 +1,4 @@
-import { ArrowRight, Play, Sparkles, Shield, Zap, Globe } from "lucide-react";
+import { ArrowRight, Play, Sparkles, Shield, Zap } from "lucide-react";
 import demoVideo from "@/assets/display/frameful-edited-2026-02-22(1).webm";
 import { Link, useNavigate } from "react-router";
 import { Button } from "@/components/ui/button";
