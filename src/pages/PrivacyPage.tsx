@@ -67,14 +67,16 @@ export default function PrivacyPage() {
 
           <Section title="2. Data we collect">
             <strong className="font-semibold text-foreground">None.</strong> We
-            do not collect:
-            <ul className="mt-3 list-inside list-disc space-y-1.5 pl-2">
+            do not transmit or store any data on our servers, including:
+            <ul className="mt-3 mb-4 list-inside list-disc space-y-1.5 pl-2">
               <li>Screen recordings or video content</li>
-              <li>Cursor positions or click events</li>
               <li>Identifiers such as names, emails, or IP addresses</li>
               <li>Usage analytics or telemetry</li>
               <li>Cookies (we set none)</li>
             </ul>
+            <div className="mt-4">
+              <strong className="font-semibold text-foreground">Note regarding the Cutline Extension:</strong> The browser extension captures click coordinates during active recording sessions purely to pass them locally to your Cutline Studio tab for the auto-zoom feature. These coordinates are processed in memory and never leave your device.
+            </div>
           </Section>
 
           <Section title="3. Waitlist emails">

@@ -27,8 +27,8 @@
   "externally_connectable": {
     "matches": [
       "http://localhost:*/*",
-      "https://cutline.devpalwar.me/*",
-      "https://*.cutline.devpalwar.me/*"
+      "https://trycutline.devpalwar.me/*",
+      "https://*.trycutline.devpalwar.me/*"
     ]
   },
   "action": {
